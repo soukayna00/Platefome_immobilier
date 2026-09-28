@@ -1,0 +1,5 @@
+@import "tailwindcss";
+@font-face{font-family:ATBA;src:url('/fonts/NimbusSans-Regular.otf') format('opentype');font-weight:400;font-display:swap}
+@font-face{font-family:ATBA;src:url('/fonts/NimbusSans-Bold.otf') format('opentype');font-weight:700;font-display:swap}
+@theme{--color-atba-ink:#1d1d1b;--color-atba-clay:#b95334;--color-atba-cream:#f8f5f0;--color-atba-muted:#6e6a65;--font-sans:ATBA,Arial,sans-serif}
+:root{font-family:ATBA,Arial,sans-serif;color:#1d1d1b;background:#fff}body{margin:0}button,a{cursor:pointer}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #b95334;outline-offset:2px}
