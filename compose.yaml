@@ -14,6 +14,18 @@ services:
       interval: 5s
       timeout: 3s
       retries: 20
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:?Definis PGADMIN_EMAIL dans .env}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:?Definis PGADMIN_PASSWORD dans .env}
+    ports:
+      - "127.0.0.1:5051:80"
+    volumes:
+      - atba_pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   backend:
     image: atba-backend:dev
@@ -49,3 +61,4 @@ services:
 
 volumes:
   atba_postgres_data:
+  atba_pgadmin_data:
