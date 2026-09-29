@@ -1,2 +1,15 @@
 import {Link} from 'react-router'
-export default function SearchSpacePage(){const items=[['Mes recherches','Enregistrez vos critères et retrouvez de nouveaux biens.','/acheter'],['Mes favoris','Retrouvez les annonces qui vous plaisent.','/favoris'],['Mes visites','Suivez vos demandes de visite.','/explorer'],['Mes messages','Échangez directement au sujet d’une annonce.','/messages']];return <main className="mx-auto min-h-[65vh] max-w-[1280px] px-5 py-12 lg:px-9"><h1 className="text-4xl tracking-tight">Espace Recherche</h1><p className="mb-7 mt-2 text-atba-muted">Achetez ou louez avec votre compte ATBA unique.</p><div className="grid gap-5 md:grid-cols-2">{items.map(([title,description,url])=><Link to={url} key={title} className="rounded-xl border border-[#e8e3dc] bg-white p-6 shadow-sm hover:border-atba-clay"><h2 className="text-xl">{title}</h2><p className="mt-2 text-sm text-atba-muted">{description}</p><span className="mt-4 inline-block text-sm text-atba-clay">Ouvrir →</span></Link>)}</div></main>}
+export default function SearchSpacePage(){
+    const items=[['Mes recherches','Enregistrez vos critères et retrouvez de nouveaux biens.','/acheter'],['Mes favoris','Retrouvez les annonces qui vous plaisent.','/favoris'],['Mes visites','Suivez vos demandes de visite.','/explorer'],['Mes messages','Échangez directement au sujet d’une annonce.','/messages']];
+       return <main className="mx-auto min-h-[65vh] max-w-[1280px] px-5 py-12 lg:px-9">
+              <h1 className="text-4xl tracking-tight">Espace Recherche</h1>
+              <p className="mb-7 mt-2 text-atba-muted">Achetez ou louez avec votre compte ATBA unique.</p>
+              <div className="grid gap-5 md:grid-cols-2">{items.map(([title,description,url])=>
+                <Link to={url} key={title} className="rounded-xl border border-[#e8e3dc] bg-white p-6 shadow-sm hover:border-atba-clay">
+                    <h2 className="text-xl">{title}</h2>
+                    <p className="mt-2 text-sm text-atba-muted">{description}</p>
+                    <span className="mt-4 inline-block text-sm text-atba-clay">Ouvrir →</span>
+                </Link>)}
+                </div>
+                </main>
+                }

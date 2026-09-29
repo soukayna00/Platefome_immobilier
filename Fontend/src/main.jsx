@@ -6,5 +6,11 @@ import App from './App'
 import './index.css'
 
 createRoot(document.getElementById('root')).render(
-  <React.StrictMode><BrowserRouter><AtbaProvider><App/></AtbaProvider></BrowserRouter></React.StrictMode>
+  <React.StrictMode>
+    <BrowserRouter>
+    <AtbaProvider>
+      <App/>
+      </AtbaProvider>
+      </BrowserRouter>
+      </React.StrictMode>
 )
