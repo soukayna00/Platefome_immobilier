@@ -10,17 +10,45 @@ import MessagesPage from './pages/MessagesPage'
 import SearchSpacePage from './pages/SearchSpacePage'
 import OwnerSpacePage from './pages/OwnerSpacePage'
 import AccountPage from './pages/AccountPage'
+import LoginPage from './pages/LoginPage'
+import RegisterPage from './pages/RegisterPage'
+import ProtectedRoute from './components/auth/ProtectedRoute'
+
 export default function App(){return <><Navbar/><Routes>
  <Route path="/" element={<HomePage/>}/>
  <Route path="/acheter" element={<ListingsPage transaction="vente"/>}/>
  <Route path="/louer" element={<ListingsPage transaction="location"/>}/>
  <Route path="/explorer" element={<ExplorePage/>}/>
  <Route path="/bien/:id" element={<PropertyPage/>}/>
- <Route path="/favoris" element={<FavoritesPage/>}/>
- <Route path="/messages" element={<MessagesPage/>}/>
+ {/* <Route path="/favoris" element={<FavoritesPage/>}/> */}
+ {/* <Route path="/messages" element={<MessagesPage/>}/> */}
  <Route path="/espace-recherche" element={<SearchSpacePage/>}/>
- <Route path="/espace-proprietaire" element={<OwnerSpacePage/>}/>
+ {/* <Route path="/espace-proprietaire" element={<OwnerSpacePage/>}/> */}
  <Route path="/compte" element={<AccountPage/>}/>
+ <Route path="/connexion" element={<LoginPage/>}/>
+ <Route path="/inscription" element={<RegisterPage />} />
+ <Route path="/favoris" element={
+    <ProtectedRoute>
+      <FavoritesPage />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/messages"
+  element={
+    <ProtectedRoute>
+      <MessagesPage />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/espace-proprietaire"
+  element={
+    <ProtectedRoute>
+      <OwnerSpacePage />
+    </ProtectedRoute>
+  }
+/>
  <Route path="*" element={<main className="mx-auto min-h-[65vh] max-w-5xl px-5 py-20">
     <h1 className="text-4xl">Page introuvable</h1>
     <Link to="/" className="mt-5 block text-atba-clay">Retour à l’accueil →</Link>
