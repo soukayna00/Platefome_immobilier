@@ -17,6 +17,8 @@ import MyPropertiesPage from './pages/MyPropertiesPage'
 import CreatePropertyPage from './pages/CreatePropertyPage'
 import MyPropertyDetailPage from './pages/MyPropertyDetailPage'
 import EditPropertyPage from './pages/EditPropertyPage'
+import CreateAnnoncePage from './pages/CreateAnnoncePage'
+import MyAnnoncesPage from './pages/MyAnnoncesPage'
 
 export default function App(){return <><Navbar/><Routes>
  <Route path="/" element={<HomePage/>}/>
@@ -76,6 +78,22 @@ export default function App(){return <><Navbar/><Routes>
   element={
     <ProtectedRoute>
       <EditPropertyPage />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/mes-biens/:id/annonces/nouvelle"
+  element={
+    <ProtectedRoute>
+      <CreateAnnoncePage />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/mes-annonces"
+  element={
+    <ProtectedRoute>
+      <MyAnnoncesPage />
     </ProtectedRoute>
   }
 />

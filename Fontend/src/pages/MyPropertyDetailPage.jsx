@@ -1,10 +1,17 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router'
+import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { deleteBien } from '../services/biens.js'
+
+const propertyStates = {
+  neuf: 'Neuf',
+  bon_etat: 'Bon état',
+  a_renover: 'À rénover',
+}
 
 export default function MyPropertyDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
 
   const [property, setProperty] = useState(null)
   const [selectedPhoto, setSelectedPhoto] = useState(0)
@@ -107,6 +114,16 @@ export default function MyPropertyDetailPage() {
           </p>
         ) : property && (
           <>
+            {location.state?.annonceCreated && (
+              <p
+                role="status"
+                className="mt-5 rounded-xl bg-green-50 p-4 text-sm text-green-800"
+              >
+                Votre annonce a été enregistrée en brouillon.
+                Elle n’est pas encore visible dans les recherches publiques.
+              </p>
+            )}
+
             <div className="mb-8 mt-6">
               <span className="text-xs uppercase tracking-widest text-atba-clay">
                 Mon espace propriétaire
@@ -123,12 +140,21 @@ export default function MyPropertyDetailPage() {
 
               <div className="mt-6 flex flex-wrap gap-3">
                 {!deleting && (
-                  <Link
-                    to={`/mes-biens/${id}/modifier`}
-                    className="rounded-full bg-atba-clay px-5 py-2.5 text-sm font-medium text-white transition hover:brightness-95"
-                  >
-                    Modifier le bien
-                  </Link>
+                  <>
+                    <Link
+                      to={`/mes-biens/${id}/modifier`}
+                      className="rounded-full bg-atba-clay px-5 py-2.5 text-sm font-medium text-white transition hover:brightness-95"
+                    >
+                      Modifier le bien
+                    </Link>
+
+                    <Link
+                      to={`/mes-biens/${id}/annonces/nouvelle`}
+                      className="rounded-full border border-atba-clay bg-white px-5 py-2.5 text-sm font-medium text-atba-clay transition hover:bg-atba-cream"
+                    >
+                      Créer une annonce
+                    </Link>
+                  </>
                 )}
 
                 <button
@@ -211,7 +237,10 @@ export default function MyPropertyDetailPage() {
                     ['Étage', property.etage ?? 'Non renseigné'],
                     ['Parking', property.parking ? 'Oui' : 'Non'],
                     ['Ascenseur', property.ascenseur ? 'Oui' : 'Non'],
-                    ['État', property.etat_bien || 'Non renseigné'],
+                    [
+                      'État',
+                      propertyStates[property.etat_bien] || 'Non renseigné',
+                    ],
                     [
                       'Adresse approximative',
                       property.adresse_approx || 'Non renseignée',

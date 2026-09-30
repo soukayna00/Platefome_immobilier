@@ -46,9 +46,7 @@ export async function getAnnonces(
   params.set('page', String(page))
 
   const response = await fetch(`/api/annonces?${params.toString()}`, {
-    headers: {
-      Accept: 'application/json',
-    },
+    headers: { Accept: 'application/json' },
     signal,
   })
 
@@ -64,4 +62,23 @@ export async function getAnnonces(
     currentPage: result.current_page,
     lastPage: result.last_page,
   }
+}
+
+export async function getAnnonce(id, signal) {
+  const response = await fetch(`/api/annonces/${id}`, {
+    headers: { Accept: 'application/json' },
+    signal,
+  })
+
+  if (!response.ok) {
+    throw new Error(
+      response.status === 404
+        ? 'Cette annonce est introuvable ou n’est plus publiée.'
+        : 'Impossible de charger cette annonce.'
+    )
+  }
+
+  const annonce = await response.json()
+
+  return mapAnnonce(annonce)
 }
