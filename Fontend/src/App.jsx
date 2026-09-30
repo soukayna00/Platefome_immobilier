@@ -13,6 +13,10 @@ import AccountPage from './pages/AccountPage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import ProtectedRoute from './components/auth/ProtectedRoute'
+import MyPropertiesPage from './pages/MyPropertiesPage'
+import CreatePropertyPage from './pages/CreatePropertyPage'
+import MyPropertyDetailPage from './pages/MyPropertyDetailPage'
+import EditPropertyPage from './pages/EditPropertyPage'
 
 export default function App(){return <><Navbar/><Routes>
  <Route path="/" element={<HomePage/>}/>
@@ -28,6 +32,7 @@ export default function App(){return <><Navbar/><Routes>
  <Route path="/compte" element={<AccountPage/>}/>
  <Route path="/connexion" element={<LoginPage/>}/>
  <Route path="/inscription" element={<RegisterPage />} />
+ <Route path="/mes-biens" element={ <ProtectedRoute> <MyPropertiesPage /></ProtectedRoute>}/>
  <Route path="/favoris" element={
     <ProtectedRoute>
       <FavoritesPage />
@@ -43,10 +48,34 @@ export default function App(){return <><Navbar/><Routes>
   }
 />
 <Route
+  path="/mes-biens/:id"
+  element={
+    <ProtectedRoute>
+      <MyPropertyDetailPage />
+    </ProtectedRoute>
+  }
+/>
+<Route
   path="/espace-proprietaire"
   element={
     <ProtectedRoute>
       <OwnerSpacePage />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/mes-biens/nouveau"
+  element={
+    <ProtectedRoute>
+      <CreatePropertyPage />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/mes-biens/:id/modifier"
+  element={
+    <ProtectedRoute>
+      <EditPropertyPage />
     </ProtectedRoute>
   }
 />

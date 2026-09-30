@@ -43,20 +43,22 @@ export default function OwnerSpacePage() {
               {description}
             </p>
 
-            {title === 'Messages' ? (
-              <Link to="/messages" className="text-sm text-atba-clay">
-                Ouvrir →
-              </Link>
-            ) : (
-              <button
-                type="button"
-                onClick={() =>
-                  alert('Fonction à connecter à l’API Laravel.')
-                }
-                className="text-sm text-atba-clay"
-              >
+           {title === 'Mes biens' ? (
+            <Link to="/mes-biens" className="text-sm text-atba-clay">
                 Gérer →
-              </button>
+            </Link>
+            ) : title === 'Messages' ? (
+            <Link to="/messages" className="text-sm text-atba-clay">
+                Ouvrir →
+            </Link>
+            ) : (
+            <button
+                type="button"
+                onClick={() => alert('Fonction à connecter à l’API Laravel.')}
+                className="text-sm text-atba-clay"
+            >
+                Gérer →
+            </button>
             )}
           </section>
         ))}
