@@ -12,8 +12,6 @@ export default function PropertyCard({ property }) {
   const saved = Boolean(user) && favorites.includes(property.id)
 
   function handleFavorite() {
-    console.log('Clic favori — utilisateur connecté :', Boolean(user))
-
     if (!user) {
       navigate('/connexion', {
         state: {
@@ -29,12 +27,18 @@ export default function PropertyCard({ property }) {
   return (
     <article className="overflow-hidden rounded-xl border border-[#f0ece7] bg-white shadow-[0_10px_30px_#0000000b]">
       <div className="relative h-56 overflow-hidden">
-        <Link to={`/bien/${property.id}`}>
-          <img
-            src={property.image}
-            alt={property.title}
-            className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
-          />
+        <Link to={`/bien/${property.id}`} className="block h-full">
+          {property.image ? (
+            <img
+              src={property.image}
+              alt={property.title}
+              className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center bg-atba-cream text-sm text-atba-muted">
+              Aucune photo disponible
+            </div>
+          )}
         </Link>
 
         <span className="absolute left-4 top-4 rounded bg-white px-2 py-1 text-xs font-bold">
@@ -64,7 +68,8 @@ export default function PropertyCard({ property }) {
         </Link>
 
         <p className="mt-1 text-xs text-atba-muted">
-          ⌖ {property.city} · {property.neighborhood}
+          ⌖ {property.city}
+          {property.neighborhood && ` · ${property.neighborhood}`}
         </p>
 
         <p className="mt-3 text-xl font-bold">
@@ -73,7 +78,7 @@ export default function PropertyCard({ property }) {
 
         <div className="mt-3 flex gap-5 border-t border-[#e8e3dc] pt-3 text-xs text-atba-muted">
           <span>▣ {property.area} m²</span>
-          <span>♧ {property.bedrooms} chambres</span>
+          <span>{property.bedrooms} chambres</span>
         </div>
       </div>
     </article>
