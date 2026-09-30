@@ -1,81 +1,96 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import PropertyCard from '../components/property/PropertyCard'
 import PropertyFilters from '../components/property/PropertyFilters'
-import { getAnnonces } from '../services/annonces'
+import { getAnnonces } from '../services/annonces.js'
+
 export default function ListingsPage({ transaction }) {
-  const [params] = useSearchParams()
+  const [params, setParams] = useSearchParams()
+
+  const city = params.get('city') || ''
+  const type = params.get('type') || ''
+  const quarter = params.get('quarter') || ''
+  const max = params.get('max') || ''
+
+  const requestedPage = Number(params.get('page') || 1)
+  const page = Number.isInteger(requestedPage) && requestedPage > 0
+    ? requestedPage
+    : 1
+
+  const filters = { city, type, quarter, max }
 
   const [properties, setProperties] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [total, setTotal] = useState(0)
+  const [lastPage, setLastPage] = useState(1)
 
-  const [filters, setFilters] = useState({
-    city: params.get('city') || '',
-    quarter: params.get('quarter') || '',
-    type: params.get('type') || '',
-    max: params.get('max') || '',
-  })
-
-  // Synchroniser les filtres avec les paramètres de l’adresse.
-  useEffect(() => {
-    setFilters({
-      city: params.get('city') || '',
-      quarter: params.get('quarter') || '',
-      type: params.get('type') || '',
-      max: params.get('max') || '',
-    })
-  }, [params])
-
-  // Charger les annonces depuis Laravel.
   useEffect(() => {
     const controller = new AbortController()
 
-    async function loadAnnonces() {
-      setLoading(true)
-      setError('')
-      setProperties([])
-      setTotal(0)
+    setLoading(true)
+    setError('')
 
+    // Attend un court instant pour éviter une requête à chaque frappe.
+    const timer = setTimeout(async () => {
       try {
         const result = await getAnnonces(
           transaction,
-          controller.signal
+          controller.signal,
+          { city, type, quarter, max },
+          page
         )
 
         if (!controller.signal.aborted) {
           setProperties(result.properties)
           setTotal(result.total)
+          setLastPage(result.lastPage)
         }
       } catch (error) {
         if (!controller.signal.aborted) {
-          setError(error.message || 'Chargement impossible.')
+          setError(error.message || 'Impossible de charger les annonces.')
         }
       } finally {
         if (!controller.signal.aborted) {
           setLoading(false)
         }
       }
+    }, 300)
+
+    return () => {
+      clearTimeout(timer)
+      controller.abort()
+    }
+  }, [transaction, city, type, quarter, max, page])
+
+  function changeFilters(nextFilters) {
+    const nextParams = new URLSearchParams(params)
+
+    for (const key of ['city', 'type', 'quarter', 'max']) {
+      const value = nextFilters[key]
+
+      if (value !== undefined && value !== null && value !== '') {
+        nextParams.set(key, String(value))
+      } else {
+        nextParams.delete(key)
+      }
     }
 
-    loadAnnonces()
+    nextParams.delete('page')
+    setParams(nextParams, { replace: true })
+  }
 
-    return () => controller.abort()
-  }, [transaction])
+  function changePage(nextPage) {
+    const nextParams = new URLSearchParams(params)
 
-  // Filtrer les annonces actuellement chargées.
-  const results = useMemo(() => {
-    return properties.filter(property =>
-      (!filters.city || property.city === filters.city) &&
-      (!filters.quarter ||
-        property.neighborhood
-          .toLowerCase()
-          .includes(filters.quarter.toLowerCase())) &&
-      (!filters.type || property.propertyType === filters.type) &&
-      (!filters.max || property.price <= Number(filters.max))
-    )
-  }, [properties, filters])
+    if (nextPage === 1) {
+      nextParams.delete('page')
+    } else {
+      nextParams.set('page', String(nextPage))
+    }
+
+    setParams(nextParams)
+  }
 
   return (
     <main className="mx-auto min-h-[65vh] max-w-[1280px] px-5 py-12 lg:px-9">
@@ -91,46 +106,73 @@ export default function ListingsPage({ transaction }) {
         Découvrez des biens proposés directement par des particuliers.
       </p>
 
-      <PropertyFilters filters={filters} onChange={setFilters} />
+      <PropertyFilters filters={filters} onChange={changeFilters} />
 
       {loading ? (
-        <p role="status" className="py-12 text-center text-atba-muted">
+        <p role="status" className="text-atba-muted">
           Chargement des annonces…
         </p>
       ) : error ? (
-        <p
-          role="alert"
-          className="rounded-xl bg-red-50 p-5 text-sm text-red-700"
-        >
+        <p role="alert" className="rounded-xl bg-red-50 p-5 text-red-700">
           {error}
         </p>
       ) : (
         <>
           <p className="mb-4 text-sm text-atba-muted">
-            {results.length} annonce{results.length > 1 ? 's' : ''}
-            {' '}affichée{results.length > 1 ? 's' : ''}
+            {total} annonce{total > 1 ? 's' : ''}
           </p>
 
-          {total > properties.length && (
-            <p className="mb-4 text-sm text-atba-muted">
-              Seules les {properties.length} premières annonces sont
-              chargées. Les filtres s’appliquent à cette sélection.
-            </p>
-          )}
-
-          {results.length > 0 ? (
+          {properties.length > 0 ? (
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {results.map(property => (
-                <PropertyCard
-                  key={property.id}
-                  property={property}
-                />
+              {properties.map(property => (
+                <PropertyCard key={property.id} property={property} />
               ))}
             </div>
           ) : (
             <p className="rounded-xl border border-dashed border-[#e8e3dc] p-8 text-atba-muted">
-              Aucun bien ne correspond à ces critères.
+              {total > 0
+                ? 'Cette page ne contient aucune annonce. Revenez à la première page.'
+                : 'Aucun bien ne correspond à ces critères.'}
             </p>
+          )}
+
+          {(lastPage > 1 || page > 1) && (
+            <nav
+              aria-label="Pagination des annonces"
+              className="mt-8 flex flex-wrap items-center justify-center gap-4"
+            >
+              <button
+                type="button"
+                disabled={page <= 1}
+                onClick={() => changePage(page - 1)}
+                className="rounded-lg border border-[#e8e3dc] px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                ← Précédent
+              </button>
+
+              <span className="text-sm text-atba-muted">
+                Page {page} sur {lastPage}
+              </span>
+
+              <button
+                type="button"
+                disabled={page >= lastPage}
+                onClick={() => changePage(page + 1)}
+                className="rounded-lg border border-[#e8e3dc] px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Suivant →
+              </button>
+
+              {page > lastPage && (
+                <button
+                  type="button"
+                  onClick={() => changePage(1)}
+                  className="text-sm text-atba-clay underline"
+                >
+                  Première page
+                </button>
+              )}
+            </nav>
           )}
         </>
       )}

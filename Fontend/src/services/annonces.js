@@ -23,18 +23,32 @@ export function mapAnnonce(annonce) {
   }
 }
 
-export async function getAnnonces(transaction, signal) {
+export async function getAnnonces(
+  transaction,
+  signal,
+  filters = {},
+  page = 1
+) {
   const params = new URLSearchParams()
 
   if (transaction) {
     params.set('transaction', transaction)
   }
 
-  const query = params.toString()
-  const url = `/api/annonces${query ? `?${query}` : ''}`
+  for (const key of ['city', 'type', 'quarter', 'max']) {
+    const value = filters[key]
 
-  const response = await fetch(url, {
-    headers: { Accept: 'application/json' },
+    if (value !== undefined && value !== null && value !== '') {
+      params.set(key, String(value))
+    }
+  }
+
+  params.set('page', String(page))
+
+  const response = await fetch(`/api/annonces?${params.toString()}`, {
+    headers: {
+      Accept: 'application/json',
+    },
     signal,
   })
 
@@ -50,26 +64,4 @@ export async function getAnnonces(transaction, signal) {
     currentPage: result.current_page,
     lastPage: result.last_page,
   }
-}
-
-export async function getAnnonce(id, signal) {
-  const response = await fetch(
-    `/api/annonces/${encodeURIComponent(id)}`,
-    {
-      headers: { Accept: 'application/json' },
-      signal,
-    }
-  )
-
-  if (response.status === 404) {
-    throw new Error('Cette annonce est introuvable.')
-  }
-
-  if (!response.ok) {
-    throw new Error('Impossible de charger cette annonce.')
-  }
-
-  const annonce = await response.json()
-
-  return mapAnnonce(annonce)
 }

@@ -24,6 +24,7 @@ export default function App(){return <><Navbar/><Routes>
  {/* <Route path="/messages" element={<MessagesPage/>}/> */}
  <Route path="/espace-recherche" element={<SearchSpacePage/>}/>
  {/* <Route path="/espace-proprietaire" element={<OwnerSpacePage/>}/> */}
+ <Route path="/annonces" element={<ListingsPage />} />
  <Route path="/compte" element={<AccountPage/>}/>
  <Route path="/connexion" element={<LoginPage/>}/>
  <Route path="/inscription" element={<RegisterPage />} />
