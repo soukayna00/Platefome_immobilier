@@ -9,11 +9,11 @@ import './index.css'
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
-    <AtbaProvider>
       <AuthProvider>
-       <App />
+        <AtbaProvider>
+          <App />
+        </AtbaProvider>
       </AuthProvider>
-      </AtbaProvider>
-      </BrowserRouter>
-      </React.StrictMode>
+    </BrowserRouter>
+  </React.StrictMode>
 )
