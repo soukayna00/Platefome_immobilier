@@ -1,14 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import {
-  Link,
-  useLocation,
-  useNavigate,
-  useParams,
-} from 'react-router'
+import {Link,useLocation,useNavigate,useParams} from 'react-router'
 import { getAnnonce } from '../services/annonces.js'
+import { startConversation } from '../services/messages.js'
 import { useAtba } from '../context/AtbaContext'
 import { useAuth } from '../context/AuthContext'
 import VisitRequestForm from '../components/property/VisitRequestForm'
+import ReportForm from '../components/property/ReportForm'
 
 const priceFormatter = new Intl.NumberFormat('fr-MA', {
   maximumFractionDigits: 2,
@@ -27,11 +24,15 @@ export default function PropertyPage() {
   const [propertyError, setPropertyError] = useState('')
   const [selectedPhoto, setSelectedPhoto] = useState(0)
   const [favoriteBusy, setFavoriteBusy] = useState(false)
+  const [contactBusy, setContactBusy] = useState(false)
   const [actionError, setActionError] = useState('')
   const [visitOpen, setVisitOpen] = useState(false)
+  const [reportOpen, setReportOpen] = useState(false)
 
   const favoriteSubmitting = useRef(false)
+  const contactSubmitting = useRef(false)
   const visitPanelRef = useRef(null)
+  const reportPanelRef = useRef(null)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -43,6 +44,7 @@ export default function PropertyPage() {
       setProperty(null)
       setSelectedPhoto(0)
       setVisitOpen(false)
+      setReportOpen(false)
 
       try {
         const result = await getAnnonce(id, controller.signal)
@@ -81,6 +83,19 @@ export default function PropertyPage() {
       ?.focus({ preventScroll: true })
   }, [visitOpen, user])
 
+  useEffect(() => {
+    if (!reportOpen || !user) return
+
+    reportPanelRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center',
+    })
+
+    reportPanelRef.current
+      ?.querySelector('select')
+      ?.focus({ preventScroll: true })
+  }, [reportOpen, user])
+
   const saved = Boolean(user) && favorites.includes(property?.id)
   const photos = property?.photos || []
 
@@ -101,7 +116,11 @@ export default function PropertyPage() {
   }
 
   async function handleFavorite() {
-    if (!property || favoriteSubmitting.current || !requireLogin()) {
+    if (
+      !property
+      || favoriteSubmitting.current
+      || !requireLogin()
+    ) {
       return
     }
 
@@ -121,9 +140,31 @@ export default function PropertyPage() {
     }
   }
 
-  function handleContact() {
-    if (!requireLogin()) return
-    navigate('/messages')
+  async function handleContact() {
+    if (
+      !property
+      || contactSubmitting.current
+      || !requireLogin()
+    ) {
+      return
+    }
+
+    contactSubmitting.current = true
+    setContactBusy(true)
+    setActionError('')
+
+    try {
+      const conversation = await startConversation(property.id)
+
+      navigate(`/messages?conversation=${conversation.id}`)
+    } catch (error) {
+      setActionError(
+        error.message || 'Impossible de contacter le propriétaire.'
+      )
+    } finally {
+      contactSubmitting.current = false
+      setContactBusy(false)
+    }
   }
 
   function handleVisit() {
@@ -142,7 +183,16 @@ export default function PropertyPage() {
 
   function handleReport() {
     if (!requireLogin()) return
-    alert('Le signalement sera bientôt relié à Laravel.')
+
+    if (reportOpen) {
+      reportPanelRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      })
+      return
+    }
+
+    setReportOpen(true)
   }
 
   if (propertyLoading) {
@@ -271,11 +321,13 @@ export default function PropertyPage() {
           <div className="space-y-3">
             <button
               type="button"
-              disabled={authLoading}
+              disabled={authLoading || contactBusy}
               onClick={handleContact}
               className="w-full rounded-xl bg-atba-clay p-3 text-white disabled:opacity-50"
             >
-              Contacter le propriétaire
+              {contactBusy
+                ? 'Ouverture…'
+                : 'Contacter le propriétaire'}
             </button>
 
             <button
@@ -321,15 +373,30 @@ export default function PropertyPage() {
               type="button"
               disabled={authLoading}
               onClick={handleReport}
+              aria-expanded={reportOpen && Boolean(user)}
+              aria-controls="report-panel"
               className="w-full p-2 text-sm text-atba-clay disabled:opacity-50"
             >
               ⚑ Signaler cette annonce
             </button>
+
+            {reportOpen && user && (
+              <div
+                id="report-panel"
+                ref={reportPanelRef}
+                className="scroll-mt-24"
+              >
+                <ReportForm
+                  key={`${property.id}-${user.id}`}
+                  annonceId={property.id}
+                  onClose={() => setReportOpen(false)}
+                />
+              </div>
+            )}
           </div>
 
           <p className="mt-5 text-xs leading-5 text-atba-muted">
             Les visites nécessitent la confirmation du propriétaire.
-            Les signalements ne sont pas encore enregistrés.
           </p>
         </aside>
       </div>

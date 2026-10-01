@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Conversation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\Annonce;
 
 class ConversationController extends Controller
 {
@@ -84,4 +85,33 @@ class ConversationController extends Controller
 
         return response()->json($message->fresh(), 201);
     }
+    public function start(Request $request, int $id)
+{
+    $conversation = DB::transaction(function () use ($request, $id) {
+        $annonce = Annonce::query()
+            ->where('statut_annonce', 'publiee')
+            ->lockForUpdate()
+            ->findOrFail($id);
+
+        if ((int) $annonce->user_id === (int) $request->user()->id) {
+            abort(
+                403,
+                'Vous ne pouvez pas vous contacter sur votre propre annonce.'
+            );
+        }
+
+        return Conversation::firstOrCreate(
+            [
+                'annonce_id' => $annonce->id,
+                'interlocuteur_id' => $request->user()->id,
+            ],
+            [
+                'proprietaire_id' => $annonce->user_id,
+                'statut_conversation' => 'active',
+            ]
+        );
+    });
+
+    return response()->json($conversation);
+}
 }

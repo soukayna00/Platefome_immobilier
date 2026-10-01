@@ -80,3 +80,27 @@ export async function sendMessage(id, contenu) {
 
   return readResponse(response)
 }
+export async function startConversation(annonceId) {
+  const csrfResponse = await fetch('/sanctum/csrf-cookie', {
+    credentials: 'same-origin',
+    headers: { Accept: 'application/json' },
+  })
+
+  if (!csrfResponse.ok) {
+    throw new Error('Impossible de préparer la conversation.')
+  }
+
+  const response = await fetch(
+    `/api/annonces/${annonceId}/conversation`,
+    {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        Accept: 'application/json',
+        'X-XSRF-TOKEN': csrfToken(),
+      },
+    }
+  )
+
+  return readResponse(response)
+}

@@ -1,9 +1,14 @@
 export function mapAnnonce(annonce) {
   const bien = annonce.bien
 
+  if (!bien) {
+    throw new Error('Les informations du bien sont indisponibles.')
+  }
+
   const photos = [...(bien.photos || [])]
     .sort((a, b) => a.ordre - b.ordre)
     .map(photo => photo.url_photo)
+    .filter(Boolean)
 
   return {
     id: annonce.id,
@@ -46,7 +51,9 @@ export async function getAnnonces(
   params.set('page', String(page))
 
   const response = await fetch(`/api/annonces?${params.toString()}`, {
-    headers: { Accept: 'application/json' },
+    headers: {
+      Accept: 'application/json',
+    },
     signal,
   })
 
@@ -65,16 +72,21 @@ export async function getAnnonces(
 }
 
 export async function getAnnonce(id, signal) {
-  const response = await fetch(`/api/annonces/${id}`, {
-    headers: { Accept: 'application/json' },
-    signal,
-  })
+  const response = await fetch(
+    `/api/annonces/${encodeURIComponent(id)}`,
+    {
+      headers: {
+        Accept: 'application/json',
+      },
+      signal,
+    }
+  )
 
   if (!response.ok) {
     throw new Error(
       response.status === 404
-        ? 'Cette annonce est introuvable ou n’est plus publiée.'
-        : 'Impossible de charger cette annonce.'
+        ? 'Cette annonce est introuvable ou indisponible.'
+        : 'Impossible de charger l’annonce.'
     )
   }
 

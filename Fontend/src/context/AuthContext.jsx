@@ -8,6 +8,16 @@ import {
 
 const AuthContext = createContext(null)
 
+function csrfToken() {
+  const cookie = document.cookie
+    .split('; ')
+    .find(item => item.startsWith('XSRF-TOKEN='))
+
+  return cookie
+    ? decodeURIComponent(cookie.split('=').slice(1).join('='))
+    : ''
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -15,13 +25,22 @@ export function AuthProvider({ children }) {
   const refreshUser = useCallback(async () => {
     try {
       const response = await fetch('/api/user', {
-        headers: { Accept: 'application/json' },
         credentials: 'same-origin',
+        headers: {
+          Accept: 'application/json',
+        },
       })
 
-      setUser(response.ok ? await response.json() : null)
+      const authenticatedUser = response.ok
+        ? await response.json()
+        : null
+
+      setUser(authenticatedUser)
+
+      return authenticatedUser
     } catch {
       setUser(null)
+      return null
     } finally {
       setLoading(false)
     }
@@ -30,26 +49,21 @@ export function AuthProvider({ children }) {
   async function logout() {
     const csrfResponse = await fetch('/sanctum/csrf-cookie', {
       credentials: 'same-origin',
+      headers: {
+        Accept: 'application/json',
+      },
     })
 
     if (!csrfResponse.ok) {
       throw new Error('Impossible de préparer la déconnexion.')
     }
 
-    const cookie = document.cookie
-      .split('; ')
-      .find(item => item.startsWith('XSRF-TOKEN='))
-
-    const token = cookie
-      ? decodeURIComponent(cookie.split('=').slice(1).join('='))
-      : ''
-
     const response = await fetch('/logout', {
       method: 'POST',
       credentials: 'same-origin',
       headers: {
         Accept: 'application/json',
-        'X-XSRF-TOKEN': token,
+        'X-XSRF-TOKEN': csrfToken(),
       },
     })
 
