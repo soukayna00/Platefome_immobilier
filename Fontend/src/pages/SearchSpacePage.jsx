@@ -3,9 +3,9 @@ import { Link } from 'react-router'
 const items = [
   [
     'Mes recherches',
-    'Enregistrez vos critères et retrouvez de nouveaux biens.',
-    '/acheter',
-  ],
+    'Retrouvez et relancez vos recherches sauvegardées.',
+    '/mes-recherches',
+    ],
   [
     'Mes favoris',
     'Retrouvez les annonces qui vous plaisent.',

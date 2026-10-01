@@ -23,6 +23,7 @@ import CreateAnnoncePage from './pages/CreateAnnoncePage'
 import MyAnnoncesPage from './pages/MyAnnoncesPage'
 import ReceivedVisitsPage from './pages/ReceivedVisitsPage'
 import MyVisitsPage from './pages/MyVisitsPage'
+import MySearchesPage from './pages/MySearchesPage'
 
 import AdminRoute from './components/admin/AdminRoute'
 import AdminLayout from './components/admin/AdminLayout'
@@ -146,6 +147,7 @@ export default function App() {
 
 
         <Route element={<AuthenticatedLayout />}>
+        <Route path="/mes-recherches" element={<MySearchesPage />}/>
           <Route path="/favoris" element={<FavoritesPage />} />
           <Route path="/messages" element={<MessagesPage />} />
 

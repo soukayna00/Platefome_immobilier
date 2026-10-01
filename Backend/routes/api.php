@@ -12,8 +12,10 @@ use App\Http\Controllers\Api\DemandeVisiteController;
 use App\Http\Controllers\Api\FavoriController;
 use App\Http\Controllers\Api\SignalementController;
 use App\Http\Controllers\Admin\CatalogueController as AdminCatalogueController;
+use App\Http\Controllers\Api\RechercheSauvegardeeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
 
 
 Route::get('/health', fn () => response()->json(['status' => 'ok']));
@@ -32,6 +34,20 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         return $request->user();
     });
 
+    Route::get('/mes-recherches', [
+            RechercheSauvegardeeController::class,
+            'index',
+        ]);
+
+    Route::post('/mes-recherches', [
+            RechercheSauvegardeeController::class,
+            'store',
+        ]);
+
+    Route::delete('/mes-recherches/{id}', [
+            RechercheSauvegardeeController::class,
+            'destroy',
+        ])->whereNumber('id');
 
     Route::get('/mes-annonces', [AnnonceController::class, 'mine']);
 

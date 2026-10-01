@@ -106,8 +106,7 @@ export default function ListingsPage({ transaction }) {
         Découvrez des biens proposés directement par des particuliers.
       </p>
 
-      <PropertyFilters filters={filters} onChange={changeFilters} />
-
+    <PropertyFilters filters={filters} onChange={changeFilters} transaction={transaction} />
       {loading ? (
         <p role="status" className="text-atba-muted">
           Chargement des annonces…

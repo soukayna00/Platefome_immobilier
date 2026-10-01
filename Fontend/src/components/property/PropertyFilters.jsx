@@ -1,10 +1,31 @@
 import { useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router'
+import { useAuth } from '../../context/AuthContext'
+import SaveSearchForm from './SaveSearchForm'
 
-export default function PropertyFilters({ filters, onChange }) {
+export default function PropertyFilters({
+  filters,
+  onChange,
+  transaction = '',
+}) {
+  const { user, loading: authLoading } = useAuth()
+  const navigate = useNavigate()
+  const location = useLocation()
+
   const [cities, setCities] = useState([])
   const [types, setTypes] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [saveOpen, setSaveOpen] = useState(false)
+
+  // La transaction passée par la page reste prioritaire.
+  const effectiveTransaction =
+    transaction
+    || (location.pathname === '/acheter'
+      ? 'vente'
+      : location.pathname === '/louer'
+        ? 'location'
+        : '')
 
   useEffect(() => {
     const controller = new AbortController()
@@ -23,7 +44,9 @@ export default function PropertyFilters({ filters, onChange }) {
         ])
 
         if (responses.some(response => !response.ok)) {
-          throw new Error('Impossible de charger les villes et les types de biens.')
+          throw new Error(
+            'Impossible de charger les villes et les types de biens.'
+          )
         }
 
         const [cityData, typeData] = await Promise.all(
@@ -50,6 +73,26 @@ export default function PropertyFilters({ filters, onChange }) {
     return () => controller.abort()
   }, [])
 
+  function changeFilter(name, value) {
+    setSaveOpen(false)
+    onChange({ ...filters, [name]: value })
+  }
+
+  function openSaveForm() {
+    if (authLoading || loading || error) return
+
+    if (!user) {
+      navigate('/connexion', {
+        state: {
+          from: location.pathname + location.search,
+        },
+      })
+      return
+    }
+
+    setSaveOpen(current => !current)
+  }
+
   const field =
     'rounded-lg border border-[#e8e3dc] bg-white p-3 text-sm outline-none focus:border-atba-clay disabled:opacity-50'
 
@@ -58,10 +101,10 @@ export default function PropertyFilters({ filters, onChange }) {
       <div className="grid gap-3 md:grid-cols-4">
         <select
           aria-label="Ville"
-          value={filters.city}
+          value={filters.city || ''}
           disabled={loading || Boolean(error)}
           onChange={event =>
-            onChange({ ...filters, city: event.target.value })
+            changeFilter('city', event.target.value)
           }
           className={field}
         >
@@ -83,10 +126,10 @@ export default function PropertyFilters({ filters, onChange }) {
 
         <select
           aria-label="Type de bien"
-          value={filters.type}
+          value={filters.type || ''}
           disabled={loading || Boolean(error)}
           onChange={event =>
-            onChange({ ...filters, type: event.target.value })
+            changeFilter('type', event.target.value)
           }
           className={field}
         >
@@ -108,9 +151,10 @@ export default function PropertyFilters({ filters, onChange }) {
 
         <input
           aria-label="Quartier"
-          value={filters.quarter}
+          maxLength={100}
+          value={filters.quarter || ''}
           onChange={event =>
-            onChange({ ...filters, quarter: event.target.value })
+            changeFilter('quarter', event.target.value)
           }
           placeholder="Quartier"
           className={field}
@@ -120,10 +164,11 @@ export default function PropertyFilters({ filters, onChange }) {
           aria-label="Budget maximum"
           type="number"
           min="0"
-          step="any"
-          value={filters.max}
+          max="9999999999.99"
+          step="0.01"
+          value={filters.max ?? ''}
           onChange={event =>
-            onChange({ ...filters, max: event.target.value })
+            changeFilter('max', event.target.value)
           }
           placeholder="Prix max (MAD)"
           className={field}
@@ -134,6 +179,31 @@ export default function PropertyFilters({ filters, onChange }) {
         <p role="alert" className="mt-3 text-sm text-red-700">
           {error}
         </p>
+      )}
+
+      <div className="mt-4 flex justify-end">
+        <button
+          type="button"
+          disabled={loading || authLoading || Boolean(error)}
+          onClick={openSaveForm}
+          aria-expanded={saveOpen && Boolean(user)}
+          className="rounded-full border border-atba-clay px-5 py-2.5 text-sm text-atba-clay disabled:opacity-50"
+        >
+          {saveOpen && user
+            ? 'Fermer le formulaire'
+            : 'Enregistrer ma recherche'}
+        </button>
+      </div>
+
+      {saveOpen && user && (
+        <SaveSearchForm
+          key={`${user.id}-${effectiveTransaction}`}
+          filters={filters}
+          cities={cities}
+          types={types}
+          transaction={effectiveTransaction}
+          onClose={() => setSaveOpen(false)}
+        />
       )}
     </div>
   )
