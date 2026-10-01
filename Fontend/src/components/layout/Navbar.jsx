@@ -23,17 +23,22 @@ export default function Navbar() {
     { to: '/explorer', label: 'Explorer' },
   ]
 
- const spaces = [
-  { value: 'recherche', label: 'Recherche' },
-  ...(!loading && user
-    ? [{ value: 'proprietaire', label: 'Propriétaire' }]
-    : []),
-]
+  const accountLinks = [
+    { to: '/messages', label: 'Messages' },
+    { to: '/notifications', label: 'Notifications' },
+  ]
+
+  const spaces = [
+    { value: 'recherche', label: 'Recherche' },
+    ...(!loading && user
+      ? [{ value: 'proprietaire', label: 'Propriétaire' }]
+      : []),
+  ]
 
   useEffect(() => {
     setOpen(false)
     setMobile(false)
-  }, [pathname])
+  }, [pathname, user?.id])
 
   function chooseSpace(next) {
     setSpace(next)
@@ -48,6 +53,8 @@ export default function Navbar() {
   }
 
   async function handleLogout() {
+    if (loggingOut) return
+
     setLoggingOut(true)
     setLogoutError('')
 
@@ -99,7 +106,6 @@ export default function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2">
-          {/* Choix de l’espace sur ordinateur */}
           <div className="relative hidden xl:block">
             <button
               type="button"
@@ -108,7 +114,11 @@ export default function Navbar() {
               onClick={() => setOpen(current => !current)}
               className="flex items-center gap-2 rounded-full border border-[#e5d9ca] bg-[#f8f4ee] px-3 py-2.5 text-xs text-[#51483f] hover:border-atba-clay"
             >
-           Espace {user && space === 'proprietaire' ? 'Propriétaire' : 'Recherche'}
+              Espace{' '}
+              {user && space === 'proprietaire'
+                ? 'Propriétaire'
+                : 'Recherche'}
+
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -159,14 +169,13 @@ export default function Navbar() {
               )}
             </NavLink>
 
-            {!loading && user && (
-              <NavLink to="/messages" className={navClass}>
-                Messages
+            {!loading && user && accountLinks.map(item => (
+              <NavLink key={item.to} to={item.to} className={navClass}>
+                {item.label}
               </NavLink>
-            )}
+            ))}
           </div>
 
-          {/* Compte et déconnexion sur ordinateur */}
           <div className="hidden items-center gap-2 xl:flex">
             {loading ? (
               <span
@@ -239,7 +248,6 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Navigation téléphone et tablette */}
       {mobile && (
         <nav
           id="mobile-navigation"
@@ -267,15 +275,16 @@ export default function Navbar() {
               {user && favorites.length > 0 && ` (${favorites.length})`}
             </NavLink>
 
-            {!loading && user && (
+            {!loading && user && accountLinks.map(item => (
               <NavLink
-                to="/messages"
+                key={item.to}
+                to={item.to}
                 className={navClass}
                 onClick={() => setMobile(false)}
               >
-                Messages
+                {item.label}
               </NavLink>
-            )}
+            ))}
           </div>
 
           <div className="mt-4 border-t border-[#e8e0d6] pt-4">

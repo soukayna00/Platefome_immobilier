@@ -24,6 +24,7 @@ import MyAnnoncesPage from './pages/MyAnnoncesPage'
 import ReceivedVisitsPage from './pages/ReceivedVisitsPage'
 import MyVisitsPage from './pages/MyVisitsPage'
 import MySearchesPage from './pages/MySearchesPage'
+import NotificationsPage from './pages/NotificationsPage'
 
 import AdminRoute from './components/admin/AdminRoute'
 import AdminLayout from './components/admin/AdminLayout'
@@ -150,7 +151,7 @@ export default function App() {
         <Route path="/mes-recherches" element={<MySearchesPage />}/>
           <Route path="/favoris" element={<FavoritesPage />} />
           <Route path="/messages" element={<MessagesPage />} />
-
+         <Route path="/notifications" element={<NotificationsPage />} />
           <Route
             path="/espace-proprietaire"
             element={<OwnerSpacePage />}

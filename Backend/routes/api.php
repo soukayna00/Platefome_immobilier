@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AnnonceController as AdminAnnonceController;
+use App\Http\Controllers\Admin\CatalogueController as AdminCatalogueController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\SignalementController as AdminSignalementController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
@@ -10,14 +11,13 @@ use App\Http\Controllers\Api\CatalogueController;
 use App\Http\Controllers\Api\ConversationController;
 use App\Http\Controllers\Api\DemandeVisiteController;
 use App\Http\Controllers\Api\FavoriController;
-use App\Http\Controllers\Api\SignalementController;
-use App\Http\Controllers\Admin\CatalogueController as AdminCatalogueController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\RechercheSauvegardeeController;
+use App\Http\Controllers\Api\SignalementController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-
-
+// Routes publiques
 Route::get('/health', fn () => response()->json(['status' => 'ok']));
 
 Route::get('/annonces', [AnnonceController::class, 'index']);
@@ -28,27 +28,37 @@ Route::get('/annonces/{id}', [AnnonceController::class, 'show'])
 Route::get('/villes', [CatalogueController::class, 'villes']);
 Route::get('/types-bien', [CatalogueController::class, 'typesBien']);
 
-
+// Comptes connectés et actifs
 Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
 
+    // Notifications
+    Route::get('/notifications', [NotificationController::class, 'index']);
+
+    Route::patch('/notifications/{id}/lecture', [
+        NotificationController::class,
+        'markRead',
+    ])->whereNumber('id');
+
+    // Recherches sauvegardées
     Route::get('/mes-recherches', [
-            RechercheSauvegardeeController::class,
-            'index',
-        ]);
+        RechercheSauvegardeeController::class,
+        'index',
+    ]);
 
     Route::post('/mes-recherches', [
-            RechercheSauvegardeeController::class,
-            'store',
-        ]);
+        RechercheSauvegardeeController::class,
+        'store',
+    ]);
 
     Route::delete('/mes-recherches/{id}', [
-            RechercheSauvegardeeController::class,
-            'destroy',
-        ])->whereNumber('id');
+        RechercheSauvegardeeController::class,
+        'destroy',
+    ])->whereNumber('id');
 
+    // Annonces du propriétaire
     Route::get('/mes-annonces', [AnnonceController::class, 'mine']);
 
     Route::put('/mes-annonces/{id}', [AnnonceController::class, 'update'])
@@ -57,7 +67,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::delete('/mes-annonces/{id}', [AnnonceController::class, 'destroy'])
         ->whereNumber('id');
 
-
+    // Favoris
     Route::get('/favoris', [FavoriController::class, 'index']);
 
     Route::post('/favoris/{id}', [FavoriController::class, 'store'])
@@ -66,7 +76,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::delete('/favoris/{id}', [FavoriController::class, 'destroy'])
         ->whereNumber('id');
 
-
+    // Biens du propriétaire
     Route::get('/mes-biens', [BienController::class, 'index']);
     Route::post('/mes-biens', [BienController::class, 'store']);
 
@@ -82,7 +92,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::post('/mes-biens/{id}/annonces', [AnnonceController::class, 'store'])
         ->whereNumber('id');
 
-
+    // Demandes de visite
     Route::post('/annonces/{id}/visites', [DemandeVisiteController::class, 'store'])
         ->whereNumber('id');
 
@@ -100,7 +110,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         'contact',
     ])->whereNumber('id');
 
-
+    // Messagerie
     Route::get('/conversations', [ConversationController::class, 'index']);
 
     Route::get('/conversations/{id}', [ConversationController::class, 'show'])
@@ -116,34 +126,28 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         'start',
     ])->whereNumber('id');
 
-
+    // Signalements
     Route::post('/annonces/{id}/signalements', [
         SignalementController::class,
         'store',
     ])->whereNumber('id')->middleware('throttle:10,1');
 
+    // Administration
     Route::middleware('admin')->prefix('admin')->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'index']);
 
-        Route::get('/villes', [
-            AdminCatalogueController::class,
-            'villes',
-        ]);
+        // Catalogue des villes
+        Route::get('/villes', [AdminCatalogueController::class, 'villes']);
 
-        Route::post('/villes', [
-            AdminCatalogueController::class,
-            'storeVille',
-        ]);
+        Route::post('/villes', [AdminCatalogueController::class, 'storeVille']);
 
         Route::put('/villes/{id}', [
             AdminCatalogueController::class,
             'updateVille',
         ])->whereNumber('id');
 
-
-        Route::get('/types-bien', [
-            AdminCatalogueController::class,
-            'typesBien',
-        ]);
+        // Catalogue des types de biens
+        Route::get('/types-bien', [AdminCatalogueController::class, 'typesBien']);
 
         Route::post('/types-bien', [
             AdminCatalogueController::class,
@@ -154,8 +158,8 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
             AdminCatalogueController::class,
             'updateTypeBien',
         ])->whereNumber('id');
-        Route::get('/dashboard', [DashboardController::class, 'index']);
 
+        // Modération des signalements
         Route::get('/signalements', [AdminSignalementController::class, 'index']);
 
         Route::patch('/signalements/{id}', [
@@ -163,6 +167,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
             'update',
         ])->whereNumber('id');
 
+        // Gestion des annonces
         Route::get('/annonces', [AdminAnnonceController::class, 'index']);
 
         Route::get('/annonces/{id}', [AdminAnnonceController::class, 'show'])
@@ -173,6 +178,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
             'updateStatus',
         ])->whereNumber('id');
 
+        // Gestion des utilisateurs
         Route::get('/utilisateurs', [AdminUserController::class, 'index']);
 
         Route::patch('/utilisateurs/{id}/statut', [

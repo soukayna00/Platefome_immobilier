@@ -90,7 +90,7 @@ class DemandeVisiteController extends Controller
 
     return response()->json($demandes);
 }
-    public function updateStatus(Request $request, int $id)
+   public function updateStatus(Request $request, int $id)
 {
     $data = $request->validate([
         'statut' => ['required', 'in:acceptee,refusee'],
@@ -119,11 +119,33 @@ class DemandeVisiteController extends Controller
             'statut' => $data['statut'],
         ]);
 
-        return $demande->load([
+        $demande->load([
             'utilisateur:id,nom,prenom',
             'annonce.bien.ville',
             'annonce.bien.photos',
         ]);
+
+        $accepted = $data['statut'] === 'acceptee';
+        $propertyTitle = $demande->annonce->bien?->titre ?? 'ce bien';
+        $date = $demande->date_visite->format('d/m/Y');
+        $time = substr($demande->heure_visite, 0, 5);
+
+        \App\Models\Notification::create([
+            'user_id' => $demande->user_id,
+            'type_notification' => 'visite_'.$data['statut'],
+            'titre' => $accepted
+                ? 'Votre visite a été acceptée'
+                : 'Votre visite a été refusée',
+            'contenu' => sprintf(
+                'Votre demande de visite pour « %s », prévue le %s à %s, a été %s par le propriétaire.',
+                $propertyTitle,
+                $date,
+                $time,
+                $accepted ? 'acceptée' : 'refusée'
+            ),
+        ]);
+
+        return $demande;
     });
 
     return response()->json($demande);
