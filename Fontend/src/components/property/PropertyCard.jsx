@@ -1,3 +1,4 @@
+import { useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router'
 import { formatPrice } from '../../data/demoProperties'
 import { useAtba } from '../../context/AtbaContext'
@@ -9,9 +10,15 @@ export default function PropertyCard({ property }) {
   const navigate = useNavigate()
   const location = useLocation()
 
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  const submitting = useRef(false)
+
   const saved = Boolean(user) && favorites.includes(property.id)
 
-  function handleFavorite() {
+  async function handleFavorite() {
+    if (loading || submitting.current) return
+
     if (!user) {
       navigate('/connexion', {
         state: {
@@ -21,7 +28,18 @@ export default function PropertyCard({ property }) {
       return
     }
 
-    toggleFavorite(property.id)
+    submitting.current = true
+    setSaving(true)
+    setError('')
+
+    try {
+      await toggleFavorite(property.id)
+    } catch (error) {
+      setError(error.message || 'Impossible de modifier vos favoris.')
+    } finally {
+      submitting.current = false
+      setSaving(false)
+    }
   }
 
   return (
@@ -47,15 +65,16 @@ export default function PropertyCard({ property }) {
 
         <button
           type="button"
-          disabled={loading}
+          disabled={loading || saving}
           aria-label={saved ? 'Retirer des favoris' : 'Ajouter aux favoris'}
           aria-pressed={saved}
+          aria-busy={saving}
           onClick={handleFavorite}
           className={`absolute right-4 top-3 grid h-9 w-9 place-items-center rounded-full bg-white/90 text-2xl disabled:opacity-50 ${
             saved ? 'text-atba-clay' : ''
           }`}
         >
-          {saved ? '♥' : '♡'}
+          {saving ? '…' : saved ? '♥' : '♡'}
         </button>
       </div>
 
@@ -80,6 +99,12 @@ export default function PropertyCard({ property }) {
           <span>▣ {property.area} m²</span>
           <span>{property.bedrooms} chambres</span>
         </div>
+
+        {error && (
+          <p role="alert" className="mt-3 text-xs text-red-700">
+            {error}
+          </p>
+        )}
       </div>
     </article>
   )

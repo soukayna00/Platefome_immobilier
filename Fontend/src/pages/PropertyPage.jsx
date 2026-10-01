@@ -8,6 +8,7 @@ import {
 import { getAnnonce } from '../services/annonces.js'
 import { useAtba } from '../context/AtbaContext'
 import { useAuth } from '../context/AuthContext'
+import VisitRequestForm from '../components/property/VisitRequestForm'
 
 const priceFormatter = new Intl.NumberFormat('fr-MA', {
   maximumFractionDigits: 2,
@@ -27,7 +28,10 @@ export default function PropertyPage() {
   const [selectedPhoto, setSelectedPhoto] = useState(0)
   const [favoriteBusy, setFavoriteBusy] = useState(false)
   const [actionError, setActionError] = useState('')
+  const [visitOpen, setVisitOpen] = useState(false)
+
   const favoriteSubmitting = useRef(false)
+  const visitPanelRef = useRef(null)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -38,6 +42,7 @@ export default function PropertyPage() {
       setActionError('')
       setProperty(null)
       setSelectedPhoto(0)
+      setVisitOpen(false)
 
       try {
         const result = await getAnnonce(id, controller.signal)
@@ -62,6 +67,19 @@ export default function PropertyPage() {
 
     return () => controller.abort()
   }, [id])
+
+  useEffect(() => {
+    if (!visitOpen || !user) return
+
+    visitPanelRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center',
+    })
+
+    visitPanelRef.current
+      ?.querySelector('input[name="date_visite"]')
+      ?.focus({ preventScroll: true })
+  }, [visitOpen, user])
 
   const saved = Boolean(user) && favorites.includes(property?.id)
   const photos = property?.photos || []
@@ -110,7 +128,16 @@ export default function PropertyPage() {
 
   function handleVisit() {
     if (!requireLogin()) return
-    alert('La demande de visite sera bientôt reliée à Laravel.')
+
+    if (visitOpen) {
+      visitPanelRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      })
+      return
+    }
+
+    setVisitOpen(true)
   }
 
   function handleReport() {
@@ -241,12 +268,12 @@ export default function PropertyPage() {
             </p>
           )}
 
-          <div className="grid gap-3">
+          <div className="space-y-3">
             <button
               type="button"
               disabled={authLoading}
               onClick={handleContact}
-              className="rounded-xl bg-atba-clay p-3 text-white disabled:opacity-50"
+              className="w-full rounded-xl bg-atba-clay p-3 text-white disabled:opacity-50"
             >
               Contacter le propriétaire
             </button>
@@ -255,17 +282,33 @@ export default function PropertyPage() {
               type="button"
               disabled={authLoading}
               onClick={handleVisit}
-              className="rounded-xl border border-atba-ink p-3 disabled:opacity-50"
+              aria-expanded={visitOpen && Boolean(user)}
+              aria-controls="visit-request-panel"
+              className="w-full rounded-xl border border-atba-ink p-3 disabled:opacity-50"
             >
               Demander une visite
             </button>
+
+            {visitOpen && user && (
+              <div
+                id="visit-request-panel"
+                ref={visitPanelRef}
+                className="scroll-mt-24"
+              >
+                <VisitRequestForm
+                  key={`${property.id}-${user.id}`}
+                  annonceId={property.id}
+                  onClose={() => setVisitOpen(false)}
+                />
+              </div>
+            )}
 
             <button
               type="button"
               disabled={authLoading || favoriteBusy}
               onClick={handleFavorite}
               aria-pressed={saved}
-              className="rounded-xl border border-atba-ink p-3 disabled:opacity-50"
+              className="w-full rounded-xl border border-atba-ink p-3 disabled:opacity-50"
             >
               {favoriteBusy
                 ? 'Enregistrement…'
@@ -278,15 +321,15 @@ export default function PropertyPage() {
               type="button"
               disabled={authLoading}
               onClick={handleReport}
-              className="p-2 text-sm text-atba-clay disabled:opacity-50"
+              className="w-full p-2 text-sm text-atba-clay disabled:opacity-50"
             >
               ⚑ Signaler cette annonce
             </button>
           </div>
 
           <p className="mt-5 text-xs leading-5 text-atba-muted">
-            Les demandes de visite et les signalements ne sont pas
-            encore enregistrés.
+            Les visites nécessitent la confirmation du propriétaire.
+            Les signalements ne sont pas encore enregistrés.
           </p>
         </aside>
       </div>

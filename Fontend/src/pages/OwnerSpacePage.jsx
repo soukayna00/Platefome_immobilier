@@ -16,7 +16,8 @@ const items = [
   {
     title: 'Demandes de visite reçues',
     description: 'Consultez les demandes liées à vos annonces.',
-    path: null,
+    path: '/visites-recues',
+    action: 'Consulter',
   },
   {
     title: 'Messages',

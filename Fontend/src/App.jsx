@@ -19,6 +19,8 @@ import MyPropertyDetailPage from './pages/MyPropertyDetailPage'
 import EditPropertyPage from './pages/EditPropertyPage'
 import CreateAnnoncePage from './pages/CreateAnnoncePage'
 import MyAnnoncesPage from './pages/MyAnnoncesPage'
+import ReceivedVisitsPage from './pages/ReceivedVisitsPage'
+import MyVisitsPage from './pages/MyVisitsPage'
 
 export default function App(){return <><Navbar/><Routes>
  <Route path="/" element={<HomePage/>}/>
@@ -94,6 +96,22 @@ export default function App(){return <><Navbar/><Routes>
   element={
     <ProtectedRoute>
       <MyAnnoncesPage />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/visites-recues"
+  element={
+    <ProtectedRoute>
+      <ReceivedVisitsPage />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/mes-visites"
+  element={
+    <ProtectedRoute>
+      <MyVisitsPage />
     </ProtectedRoute>
   }
 />
