@@ -12,6 +12,8 @@ use App\Http\Controllers\Api\ConversationController;
 use App\Http\Controllers\Api\DemandeVisiteController;
 use App\Http\Controllers\Api\FavoriController;
 use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\PasswordController;
+use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\RechercheSauvegardeeController;
 use App\Http\Controllers\Api\SignalementController;
 use Illuminate\Http\Request;
@@ -30,9 +32,15 @@ Route::get('/types-bien', [CatalogueController::class, 'typesBien']);
 
 // Comptes connectés et actifs
 Route::middleware(['auth:sanctum', 'active'])->group(function () {
+    // Compte
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
+
+    Route::patch('/profile', [ProfileController::class, 'update']);
+
+    Route::put('/password', [PasswordController::class, 'update'])
+        ->middleware('throttle:5,1');
 
     // Notifications
     Route::get('/notifications', [NotificationController::class, 'index']);
@@ -93,8 +101,10 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         ->whereNumber('id');
 
     // Demandes de visite
-    Route::post('/annonces/{id}/visites', [DemandeVisiteController::class, 'store'])
-        ->whereNumber('id');
+    Route::post('/annonces/{id}/visites', [
+        DemandeVisiteController::class,
+        'store',
+    ])->whereNumber('id');
 
     Route::get('/mes-visites', [DemandeVisiteController::class, 'mine']);
 
