@@ -11,22 +11,21 @@ const cities = [
   ['Marrakech', '/images/marrakech.webp'],
   ['Casablanca', '/images/casablanca.webp'],
 ]
-
 const features = [
   [
     '⌕',
     'Enregistrer une recherche',
-    'Retrouvez vos critères et recevez des alertes.',
+    'Sauvegardez vos critères et relancez votre recherche.',
   ],
   [
-    '▣',
-    'Comparer les biens',
-    'Comparez prix, surface et caractéristiques.',
+    '♡',
+    'Retrouver mes favoris',
+    'Gardez les annonces qui vous intéressent.',
   ],
   [
     '▤',
     'Suivre mes visites',
-    'Retrouvez vos demandes de visite.',
+    'Consultez vos demandes et les réponses des propriétaires.',
   ],
 ]
 
@@ -53,7 +52,7 @@ export default function HomePage() {
         const result = await getAnnonces(undefined, controller.signal)
 
         if (!controller.signal.aborted) {
-          setProperties(result.properties.slice(0, 3))
+          setProperties(result.properties.slice(0, 6))
         }
       } catch (error) {
         if (!controller.signal.aborted) {

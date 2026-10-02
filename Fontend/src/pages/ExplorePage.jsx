@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import CityCard from '../components/home/CityCard'
 import PropertyCard from '../components/property/PropertyCard'
 import { getAnnonces } from '../services/annonces.js'
+import { Link } from 'react-router'
 
 const cities = [
   ['Tanger', '/images/tanger.webp'],
@@ -58,9 +59,18 @@ export default function ExplorePage() {
         ))}
       </div>
 
-      <h2 className="mb-5 mt-14 text-3xl">
-        Quelques biens à découvrir
-      </h2>
+      <div className="mb-5 mt-14 flex flex-wrap items-center justify-between gap-4">
+        <h2 className="text-3xl">
+          Quelques biens à découvrir
+        </h2>
+
+        <Link
+          to="/annonces"
+          className="text-sm font-medium text-atba-clay"
+        >
+          Voir toutes les annonces →
+        </Link>
+      </div>
 
       {loading ? (
         <p role="status" className="text-atba-muted">
