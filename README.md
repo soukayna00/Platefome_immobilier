@@ -130,5 +130,7 @@ Les contributions passent par une branche dédiée, des tests adaptés et une Pu
 
 L'interface visée est sobre et accueillante : **blanc, beige clair et noir**, avec un accent **terre cuite** inspiré du seuil et de l'architecture marocaine. Le logo ATBA et l'écriture arabe عتبة servent de point de départ ; les variantes finales seront adaptées aux usages web et mobiles.
 
+## Atba demo
 
+[Watch the Atba walkthrough](./docs/demo final atba.webm)
 
