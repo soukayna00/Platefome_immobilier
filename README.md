@@ -13,7 +13,7 @@
   <img alt="PostgreSQL" src="https://img.shields.io/badge/PostgreSQL-Database-C46D4B?style=for-the-badge&logo=postgresql&logoColor=white" />
 </p>
 
-> **Statut du dépôt :** projet en phase de conception. Les fonctionnalités et l'infrastructure ci-dessous décrivent le périmètre prévu ; leur présence dans une version donnée dépend de l'avancement du développement.
+
 
 ## Présentation
 
@@ -131,6 +131,4 @@ Les contributions passent par une branche dédiée, des tests adaptés et une Pu
 L'interface visée est sobre et accueillante : **blanc, beige clair et noir**, avec un accent **terre cuite** inspiré du seuil et de l'architecture marocaine. Le logo ATBA et l'écriture arabe عتبة servent de point de départ ; les variantes finales seront adaptées aux usages web et mobiles.
 
 
-## Licence
 
-Licence à définir. Aucune autorisation de réutilisation n'est présumée tant qu'un fichier de licence n'est pas ajouté au dépôt.
