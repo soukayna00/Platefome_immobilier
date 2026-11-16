@@ -1,0 +1,38 @@
+FROM node:22-bookworm-slim AS frontend
+WORKDIR /app
+
+COPY Fontend/package.json Fontend/package-lock.json ./
+RUN npm ci
+
+COPY Fontend/ ./
+RUN npm run build
+
+FROM php:8.5-fpm-bookworm
+WORKDIR /var/www/html
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    nginx libpq-dev libicu-dev libzip-dev libonig-dev unzip \
+    && docker-php-ext-install pdo_pgsql intl zip bcmath mbstring \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
+COPY Backend/ ./
+
+RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader \
+    && mkdir -p storage/app/public \
+    && chown -R www-data:www-data storage bootstrap/cache
+
+COPY --from=frontend /app/dist/ /var/www/frontend/
+COPY Nginx/default.conf /etc/nginx/sites-available/default
+
+RUN sed -i \
+    -e 's/listen 80;/listen 10000;/' \
+    -e 's|/var/www/storage/|/var/www/html/storage/app/public/|' \
+    -e 's/backend:9000/127.0.0.1:9000/g' \
+    -e '/proxy_pass http:\/\/frontend:5173;/,/proxy_set_header Connection "upgrade";/c\        root /var/www/frontend;\n        try_files $uri $uri/ /index.html;' \
+    /etc/nginx/sites-available/default \
+    && nginx -t
+
+EXPOSE 10000
+
+CMD ["sh", "-c", "php-fpm -D && exec nginx -g 'daemon off;'"]
