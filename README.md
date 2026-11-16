@@ -13,6 +13,12 @@
   <img alt="PostgreSQL" src="https://img.shields.io/badge/PostgreSQL-Database-C46D4B?style=for-the-badge&logo=postgresql&logoColor=white" />
 </p>
 
+## Démo en ligne
+
+[**Voir la démo en ligne**](https://atba-plateform-immobilier.onrender.com/)
+
+Le premier chargement peut prendre environ une minute si le service est en veille.
+
 
 
 ## Présentation
@@ -129,8 +135,4 @@ Les contributions passent par une branche dédiée, des tests adaptés et une Pu
 ## Design
 
 L'interface visée est sobre et accueillante : **blanc, beige clair et noir**, avec un accent **terre cuite** inspiré du seuil et de l'architecture marocaine. Le logo ATBA et l'écriture arabe عتبة servent de point de départ ; les variantes finales seront adaptées aux usages web et mobiles.
-
-## Atba demo
-
-[Watch the Atba walkthrough](./docs/demo final atba.webm)
 
